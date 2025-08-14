@@ -76,6 +76,10 @@ The application uses **Qwen3 Coder** model through OpenRouter API. You can custo
 - `MAX_TOKENS`: Maximum response length
 - `TEMPERATURE`: Response creativity
 
+⚠️ Important Note About Qwen Model
+Be careful when using qwen/qwen3-coder:free – this model has very restrictive rate limits. Although it may pass validation tests (short requests), it does not work well with real chat conversations due to very low token limits.
+  
+
 ## 📝 License
 
 This project is licensed under the MIT License.
