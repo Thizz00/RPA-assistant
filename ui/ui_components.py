@@ -1,5 +1,13 @@
+import sys
+import os
+
+sys.path.append(os.path.dirname(__file__))
+
 import streamlit as st
 from typing import Dict
+from core.config import load_config
+
+config = load_config()
 
 def render_header():
     """Render application header"""
@@ -36,7 +44,10 @@ def render_sidebar():
 def render_model_info():
     """Render model information"""
     st.markdown("## 🧠 Model")
-    st.info("Specializing in coding and automation")
+    st.info(f"{config.MODEL_NAME}")
+    st.markdown("---")
+    st.markdown("## 👻 Developed by JKiełb")
+ 
 
 def render_chat_message(message: Dict[str, str], is_user: bool = True):
     """Render single chat message"""
@@ -68,7 +79,7 @@ def format_code_response(content: str):
 
 def render_loading_spinner(message: str = "Generating code..."):
     """Render loading spinner"""
-    return st.spinner(f"🤖 {message}")
+    return st.spinner(f"🤖 fasfasfasfasfasfas {message}")
 
 def render_success_message(message: str):
     """Render success message"""

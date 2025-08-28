@@ -9,11 +9,11 @@ class AppConfig:
     """RPA Code Assistant application configuration"""
     
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
-    MODEL_NAME: str = "qwen/qwen3-coder:free"
+    MODEL_NAME: str = "agentica-org/deepcoder-14b-preview:free"
     
     APP_TITLE: str = "🤖 RPA Code Assistant"
     APP_DESCRIPTION: str = "Intelligent assistant for RPA coding and automation"
-    MAX_TOKENS: int = 2000
+    MAX_TOKENS: int = 6000
     TEMPERATURE: float = 0.7
     
     CUSTOM_CSS: str = """

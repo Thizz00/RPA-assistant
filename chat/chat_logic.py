@@ -1,6 +1,7 @@
 import streamlit as st
 from typing import List, Dict
 import os
+import re
 
 try:
     from core.api_client import get_api_client
@@ -84,7 +85,7 @@ def send_message(user_input: str) -> None:
                         full_response += chunk
                         message_placeholder.markdown(full_response + "▊")
                 
-                message_placeholder.markdown(full_response)
+                render_message_content(full_response, message_placeholder)
         
         if full_response.strip():
             st.session_state.messages.append({
@@ -106,24 +107,93 @@ def handle_quick_prompt():
         st.session_state.pending_prompt = None
         send_message(prompt)
 
+def render_message_content(content: str, placeholder=None):
+    """Render message content with proper LaTeX and code formatting"""
+    
+    def render_to_target(markdown_content):
+        if placeholder:
+            placeholder.markdown(markdown_content, unsafe_allow_html=True)
+        else:
+            st.markdown(markdown_content, unsafe_allow_html=True)
+    
+    if '```' in content:
+        parts = content.split('```')
+        rendered_content = ""
+        
+        for i, part in enumerate(parts):
+            if i % 2 == 0: 
+                if part.strip():
+
+                    processed_part = process_latex(part)
+                    rendered_content += processed_part
+            else:  
+                lines = part.split('\n')
+                language = lines[0] if lines[0] in ['python', 'javascript', 'bash', 'sql', 'html', 'css', 'json', 'xml'] else 'python'
+                code = '\n'.join(lines[1:]) if lines[0] in ['python', 'javascript', 'bash', 'sql', 'html', 'css', 'json', 'xml'] else part
+                
+
+                rendered_content += f"\n```{language}\n{code}\n```\n"
+        
+        render_to_target(rendered_content)
+    else:
+        processed_content = process_latex(content)
+        render_to_target(processed_content)
+
+def process_latex(text: str) -> str:
+    """Process LaTeX expressions in text"""
+    
+    text = re.sub(r'\\\[(.*?)\\\]', r'$$\1$$', text, flags=re.DOTALL)
+    
+    text = re.sub(r'\\\((.*?)\\\)', r'$\1$', text, flags=re.DOTALL)
+    
+    text = re.sub(r'\\boxed\{(.*?)\}', r'\\boxed{\1}', text)
+    
+    return text
+
 def display_chat_history():
-    """Display chat history"""
+    """Display chat history with proper formatting"""
     for message in st.session_state.messages:
         if message['role'] == 'user':
             with st.chat_message("user"):
                 st.markdown(message['content'])
         else:
             with st.chat_message("assistant"):
-                if '```' in message['content']:
-                    parts = message['content'].split('```')
-                    for i, part in enumerate(parts):
-                        if i % 2 == 0:  # Text parts
-                            if part.strip():
-                                st.markdown(part)
-                        else:  # Code parts
-                            lines = part.split('\n')
-                            language = lines[0] if lines[0] in ['python', 'javascript', 'bash', 'sql'] else 'python'
-                            code = '\n'.join(lines[1:]) if lines[0] in ['python', 'javascript', 'bash', 'sql'] else part
-                            st.code(code, language=language)
+                render_message_content(message['content'])
+
+def render_message_with_katex(content: str, placeholder=None):
+    """
+    Alternative rendering method using streamlit-katex for better LaTeX support.
+    Requires: pip install streamlit-katex
+    """
+    try:
+        import streamlit_katex as katex
+        
+        def render_to_target(markdown_content):
+            if placeholder:
+                placeholder.markdown(markdown_content)
+            else:
+                st.markdown(markdown_content)
+        
+        
+        if '```' in content:
+            parts = content.split('```')
+            for i, part in enumerate(parts):
+                if i % 2 == 0:
+                    if part.strip():
+                        if '$' in part or '\\[' in part or '\\(' in part:
+                            katex.st_katex(part)
+                        else:
+                            render_to_target(part)
                 else:
-                    st.markdown(message['content'])
+                    lines = part.split('\n')
+                    language = lines[0] if lines[0] in ['python', 'javascript', 'bash', 'sql'] else 'python'
+                    code = '\n'.join(lines[1:]) if lines[0] in ['python', 'javascript', 'bash', 'sql'] else part
+                    st.code(code, language=language)
+        else:
+            if '$' in content or '\\[' in content or '\\(' in content:
+                katex.st_katex(content)
+            else:
+                render_to_target(content)
+                
+    except ImportError:
+        render_message_content(content, placeholder)
