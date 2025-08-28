@@ -70,7 +70,7 @@ RPA-assistant/
 
 ## 🔧 Configuration
 
-The application uses **Qwen3 Coder** model through OpenRouter API. You can customize settings in `core/config.py`:
+The application uses models such as **Qwen3 Coder** and **deepcoder-14b** via the OpenRouter API. Settings can be customized in the `core/config.py` file:
 
 - `MODEL_NAME`: Language model
 - `MAX_TOKENS`: Maximum response length
